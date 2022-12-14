@@ -1,0 +1,147 @@
+# VBA Homework: The VBA of Wall Street
+
+Sub multiple_year_stock_data()
+'Loop through all sheets
+For Each ws In Worksheets
+
+    'Create a variable to Last Row Ticker
+    lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    'Define variables
+    Dim Ticker As String
+    Dim Yearly_change As Double
+    Yearly_change = 0
+    Dim Percent_change As Double
+    Percent_change = 0
+    Dim Total_stock As Double
+    Total_stock = 0
+    'Keep track of the location for each ticker in the summary table
+    Dim Summary_Table_Row As Integer
+    Summary_Table_Row = 2
+    
+    'Name columns in summary table
+    ws.Range("I1").Value = "Ticker"
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+    
+    'Set the column start
+    j = 2
+   
+    'Loop through all Ticker Symbol
+        For i = 2 To lastrow
+        
+         'Check if we are still within the same Ticker
+          If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+          
+          'Set the Ticker
+         Ticker = ws.Cells(i, 1).Value
+         
+         'Print the Ticker in the Summary Table
+          ws.Range("I" & Summary_Table_Row).Value = Ticker
+            
+         'Calculate the Yearly Change
+         Yearly_change = ws.Cells(i, 6).Value - ws.Cells(j, 3).Value
+         
+          'Print the Yearly Change in the Summary Table
+          ws.Range("J" & Summary_Table_Row).Value = Yearly_change
+         
+         'Set the conditional formatting that will highlight positive change in green and negative change in red.
+            If Yearly_change < 0 Then
+         
+            'Set the Cell Colours to Red
+              ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+              
+              Else
+  
+            'Set the Cell Colours to Green
+             ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+             
+             End If
+             
+             'For calculate the Percent change the denominatr can not be 0.
+             If ws.Cells(j, 3).Value <> 0 Then
+             
+           'Calculate the Percent Change
+           Percent_change = Yearly_change / ws.Cells(j, 3).Value
+           
+            'Print the Percent change in the Summary Table
+            ws.Range("K" & Summary_Table_Row).Value = Percent_change
+            
+            'Format column Percent change
+            ws.Range("K" & Summary_Table_Row).NumberFormat = "0.00%"
+            
+            Else
+            Percent_change = 0
+            
+            End If
+
+        'Add to the Total Stock Volume
+        Total_stock = Total_stock + ws.Cells(i, 7).Value
+
+        'Print the Brand Amount to the Summary Table
+        ws.Range("L" & Summary_Table_Row).Value = Total_stock
+
+        'Add one to the summary table row
+        Summary_Table_Row = Summary_Table_Row + 1
+
+        'Reset the Total_stock
+        Total_stock = 0
+        
+        Else
+        
+         'Add to the Total_Stock
+         Total_stock = Total_stock + ws.Cells(i, 7).Value
+
+       
+        j = i + 1
+
+        End If
+        
+        Next i
+        
+   'Create a variable to Last Row Ticker
+    lastrowsummary = ws.Cells(Rows.Count, 9).End(xlUp).Row
+        
+   'Name columns
+    ws.Range("O2").Value = "Greatest % increase"
+    ws.Range("O3").Value = "Greatest % decrease"
+    ws.Range("O4").Value = "Greatest total volume"
+    ws.Range("P1").Value = "Ticker"
+    ws.Range("Q1").Value = "Value"
+    
+     'Loop through the Summary Table
+     For i = 2 To lastrowsummary
+          'Look for the greatest % increase
+          If ws.Cells(i, 11).Value = Application.Max(ws.Range("K2:K" & lastrowsummary)) Then
+         'Set the Ticker
+          ws.Cells(2, 16).Value = ws.Cells(i, 9).Value
+         'Set the Value
+          ws.Cells(2, 17).Value = ws.Cells(i, 11).Value
+    
+         End If
+          'Look for the greatest % decrease
+         If ws.Cells(i, 11).Value = Application.Min(ws.Range("K2:K" & lastrowsummary)) Then
+            'Set the Ticker
+            ws.Cells(3, 16).Value = ws.Cells(i, 9).Value
+             'Set the Value
+            ws.Cells(3, 17).Value = ws.Cells(i, 11).Value
+
+         End If
+    
+          If ws.Cells(i, 12).Value = Application.Max(ws.Range("L2:L" & lastrowsummary)) Then
+         'Set the Ticker
+          ws.Cells(4, 16).Value = ws.Cells(i, 9).Value
+         'Set the Value
+          ws.Cells(4, 17).Value = ws.Cells(i, 12).Value
+    
+         End If
+    
+   Next i
+   
+ Next ws
+   
+End Sub
+
+
+
